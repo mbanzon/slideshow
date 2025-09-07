@@ -1,0 +1,12 @@
+main>img {
+    max-width: 25rem;
+    max-height: 25rem;
+    height: auto;
+    width: auto;
+    transition: max-width 0.3s ease, max-height 0.3s ease;
+}
+
+main>img.small-image {
+    max-width: 10rem !important;
+    max-height: 10rem !important;
+}

@@ -1,0 +1,49 @@
+@if (slideshowService.imagesFiles().length > 0) {
+    <div class="flex flex-col gap-[32px] row-start-2 items-center justify-center sm:items-center">
+        <div class="flex items-center space-x-2">
+            <button
+                (click)="slideshowService.startSlideshow()"
+                class="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 dark:bg-white dark:text-black hover:dark:bg-gray-200"
+            >
+            @if (slideshowService.isStarted()) {
+                Resume Slideshow
+            } @else {
+                Start Slideshow
+            }
+            </button>
+        
+            @if (slideshowService.canResume()) {
+                <button
+                    (click)="slideshowService.restartSlideshow()"
+                    class="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 dark:bg-white dark:text-black hover:dark:bg-gray-200"
+                >
+                    Restart Slideshow
+                </button>
+            }
+        </div>
+
+        <div class="flex items-center">
+            <input
+                [checked]="slideshowService.randomized()"
+                id="checkbox"
+                type="checkbox"
+                class="h-4 w-4 text-black border-gray-300 rounded focus:ring-black dark:focus:ring-white"
+                (change)="slideshowService.randomized.set(!slideshowService.randomized())"
+            />
+            <label htmlFor="checkbox" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Random order</label>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <label htmlFor="interval" class="text-sm font-medium text-gray-700 dark:text-gray-300">Interval (seconds)</label>
+            <input
+                id="interval"
+                type="number"
+                [value]="slideshowService.interval()"
+                [min]="1"
+                (change)="slideshowService.interval.set(Number($event.target.value))"
+                class="text-right text-sm w-20 px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                placeholder="Enter a number"
+            />
+        </div>
+    </div>
+}

@@ -1,0 +1,17 @@
+@if (loading) {
+    <div class="border-2 border-dashed border-gray-400 rounded-lg p-8 w-full max-w-md text-center">
+        <p class="text-gray-600 dark:text-gray-400 animate-bounce">
+            Loading files, please wait
+        </p>
+    </div>
+} @else {
+    <div
+        class="border-2 border-dashed border-gray-400 rounded-lg p-8 w-full max-w-md text-center"
+        (drop)="handleDrop($event)"
+        (dragOver)="handleDragOver($event)"
+        >
+        <p class="text-gray-600 dark:text-gray-400">
+            Drag and drop images or folders here
+        </p>
+    </div>
+}
