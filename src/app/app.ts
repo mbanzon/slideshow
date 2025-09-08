@@ -20,5 +20,37 @@ export class App implements OnInit {
         e.preventDefault();
       }
     });
+
+    this.setFaviconString('🖼️');
+  }
+
+  setFaviconString(emoji:string) {
+    // Create a canvas to draw the emoji
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 64;
+
+    const ctx = canvas.getContext("2d");
+
+    if (ctx == null) return;
+
+    ctx.font = "64px serif"; // Use serif for better emoji rendering
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(emoji, canvas.width / 2, canvas.height / 2);
+
+    // Convert canvas to Data URL
+    const faviconURL = canvas.toDataURL();
+
+    // Find or create the favicon link element
+    let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement("link") as HTMLLinkElement;
+      link.rel = "icon";
+      document.head.appendChild(link);
+    }
+
+    // Set the favicon to the emoji-generated image
+    link.href = faviconURL;
   }
 }
