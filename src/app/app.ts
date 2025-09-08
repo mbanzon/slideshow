@@ -13,6 +13,7 @@ import { SlideshowPlayer } from './components/slideshow-player/slideshow-player'
 })
 export class App implements OnInit {
   slideshowService = inject(SlideshowService);
+  showDescription = false;
 
   ngOnInit(): void {
     window.addEventListener('beforeunload', e => {

@@ -4,7 +4,7 @@
   
       <img src="/slideshow.png" alt="Logo - it is a gorilla looking at frog pictures" [class]="slideshowService.imagesFiles().length > 0 ? 'small-image' : ''" />
         
-      <h1 class="text-2xl font-bold">Slideshow 🚀</h1>
+      <h1 class="text-2xl font-bold">Slideshow 🚀 <span>?</span></h1>
   
       <app-drop-images></app-drop-images>
   
@@ -12,7 +12,18 @@
         
       <app-slideshow-config></app-slideshow-config>
           
-      <p class="my-16 text-sm text-gray-500">with ❤️ from <a href="https://michaelbanzon.com/">Michael Banzon</a></p>
+      <p class="mt-8 text-sm text-gray-500">
+        with ❤️ from <a href="https://michaelbanzon.com/">Michael Banzon</a>
+      </p>
+
+      <p (click)="showDescription = !showDescription" class="text-sm text-gray-500 cursor-pointer">What is this?</p>
+
+      @if (showDescription) {
+        <p class="text-sm text-gray-500">
+          This is an app that let's you create a slideshow using your own images! No data is uploaded, everything
+          happens on your machine.
+        </p>
+      }
     </main>
   </div>
 } @else {
