@@ -12,7 +12,7 @@ export class ImageCount {
 
   clearImages() {
     if (confirm("Are you sure you want to clear all images?")) {
-      this.slideshowService.imagesFiles.set([]);
+      this.slideshowService.clear();
     }
   }
 }

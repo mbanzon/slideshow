@@ -1,7 +1,7 @@
-@if (slideshowService.imagesFiles().length > 0) {
+@if (slideshowService.hasImages()) {
     <div class="flex items-center gap-4">
         <p class="text-gray-700 dark:text-gray-200">
-            Images added: <strong>{{ slideshowService.imagesFiles().length }}</strong>
+            Images added: <strong>{{ slideshowService.imageCount() }}</strong>
         </p>
     
         <button (click)="clearImages()" class="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 dark:bg-gray-800 dark:text-white hover:dark:bg-gray-900">

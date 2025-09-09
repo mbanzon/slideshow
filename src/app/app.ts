@@ -17,7 +17,7 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     window.addEventListener('beforeunload', e => {
-      if (this.slideshowService.imagesFiles().length > 0) {
+      if (this.slideshowService.hasImages()) {
         e.preventDefault();
       }
     });

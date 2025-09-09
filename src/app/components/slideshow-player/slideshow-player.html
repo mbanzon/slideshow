@@ -9,14 +9,14 @@
     <div class="absolute bottom-4 right-4 flex gap-4 opacity-25 hover:opacity-100 transition-opacity p-8">
         
         <button
-            (click)="slideshowService.isPaused.set(!slideshowService.isPaused())"
+            (click)="slideshowService.isPaused() ? slideshowService.resume() : slideshowService.pause()"
             class="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300"
             >
             @if (slideshowService.isPaused()) { Resume } @else { Pause }
         </button>
     
         <button
-            (click)="slideshowService.stopSlideshow()"
+            (click)="slideshowService.stop()"
             class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
             >
             Stop

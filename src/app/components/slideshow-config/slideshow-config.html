@@ -1,20 +1,20 @@
-@if (slideshowService.imagesFiles().length > 0) {
+@if (slideshowService.hasImages()) {
     <div class="flex flex-col gap-[32px] row-start-2 items-center justify-center sm:items-center">
         <div class="flex items-center space-x-2">
             <button
-                (click)="slideshowService.startSlideshow()"
+                (click)="slideshowService.start()"
                 class="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 dark:bg-white dark:text-black hover:dark:bg-gray-200"
             >
-            @if (slideshowService.isStarted()) {
+            @if (slideshowService.isStopped()) {
                 Resume Slideshow
             } @else {
                 Start Slideshow
             }
             </button>
         
-            @if (slideshowService.canResume()) {
+            @if (slideshowService.isStopped()) {
                 <button
-                    (click)="slideshowService.restartSlideshow()"
+                    (click)="slideshowService.restart()"
                     class="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 dark:bg-white dark:text-black hover:dark:bg-gray-200"
                 >
                     Restart Slideshow
