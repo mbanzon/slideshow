@@ -1,6 +1,3 @@
-import { output, signal } from "@angular/core";
-import { SlideshowService } from "./services/slideshow";
-
 export const STATE_NEW = 'new';
 export const STATE_HAS_IMAGES = 'loaded';
 export const STATE_RUNNING = 'started';
