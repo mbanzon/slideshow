@@ -21,10 +21,7 @@ export class SlideshowService {
 
   private readonly effects = new Map<SlideshowState, SlideshowStateEffect>([
     [STATE_NEW, () => {
-      this.imageFiles = [];
-      this.indicies = [];
-      this.indexIndex = 0;
-      this.ticker = null;
+      this.resetAll();
     }],
     [STATE_HAS_IMAGES, () => {
       this.indicies = this.imageFiles.map((_, i) => i);
@@ -88,6 +85,7 @@ export class SlideshowService {
 
   restart() {
     this.indexIndex = 0;
+    this.currentImgSrc.set(null);
     this.start();
   }
 
@@ -107,5 +105,13 @@ export class SlideshowService {
     const reader = new FileReader();
     reader.onload = () => this.currentImgSrc.set(reader.result as string);
     reader.readAsDataURL(this.imageFiles[this.indicies[this.indexIndex]]);
+  }
+
+  private resetAll() {
+    this.imageFiles = [];
+    this.indicies = [];
+    this.indexIndex = 0;
+    this.ticker = null;
+    this.currentImgSrc.set(null);
   }
 }

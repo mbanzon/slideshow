@@ -50,14 +50,15 @@ private static readonly actions = new Map<SlideshowState, Map<SlideshowAction, S
     ])],
     [STATE_PAUSED, new Map([
         [ACTION_RESUME, STATE_RUNNING],
-        [ACTION_STOP, STATE_HAS_IMAGES],
+        [ACTION_STOP, STATE_STOPPED],
         [ACTION_NEXT, STATE_PAUSED],
-        [ACTION_PREVIOUS, STATE_PAUSED]
+        [ACTION_PREVIOUS, STATE_PAUSED],
     ])],
     [STATE_STOPPED, new Map([
         [ACTION_RESUME, STATE_RUNNING],
         [ACTION_START, STATE_RUNNING],
         [ACTION_CLEAR, STATE_NEW],
+        [ACTION_LOAD, STATE_HAS_IMAGES],
     ])],
 ]);
   private state : SlideshowState = STATE_NEW;
