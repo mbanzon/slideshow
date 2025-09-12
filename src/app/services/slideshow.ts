@@ -1,7 +1,23 @@
 import { effect, Injectable, signal } from '@angular/core';
-import { ACTION_CLEAR, ACTION_LOAD, ACTION_NEXT, ACTION_PAUSE, ACTION_PREVIOUS, ACTION_RESUME, ACTION_START, ACTION_STOP, SlideshowAction, SlideshowState, SlideshowStateEffect, SlideshowStatemachine, STATE_HAS_IMAGES, STATE_NEW, STATE_PAUSED, STATE_RUNNING, STATE_STOPPED } from '../SlideshowStatemachine';
-
-
+import {
+  ACTION_CLEAR,
+  ACTION_LOAD,
+  ACTION_NEXT,
+  ACTION_PAUSE,
+  ACTION_PREVIOUS,
+  ACTION_RESUME,
+  ACTION_START,
+  ACTION_STOP,
+  SlideshowAction,
+  SlideshowState,
+  SlideshowStateEffect,
+  SlideshowStatemachine,
+  STATE_HAS_IMAGES,
+  STATE_NEW,
+  STATE_PAUSED,
+  STATE_RUNNING,
+  STATE_STOPPED
+} from '../SlideshowStatemachine';
 
 @Injectable({
   providedIn: 'root'
