@@ -18,10 +18,10 @@
       </p>
       
 
-      <p (click)="showDescription = !showDescription" class="text-sm text-gray-500 cursor-pointer">What is this?</p>
+      <p id="show-description" (click)="showDescription = !showDescription" class="text-sm text-gray-500 cursor-pointer">What is this?</p>
 
       @if (showDescription) {
-        <p class="text-sm text-gray-500">
+        <p id="description" class="text-sm text-gray-500">
           This is an app that let's you create a slideshow using your own images! No data is uploaded, everything
           happens on your machine.
         </p>
