@@ -1,4 +1,5 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { SlideshowService } from '../../services/slideshow';
 
 @Component({
@@ -10,6 +11,7 @@ import { SlideshowService } from '../../services/slideshow';
 export class DropImages implements OnInit, OnDestroy {
   loading = false;
   slideshowService = inject(SlideshowService);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   
   async handleDrop(event: DragEvent) {
     this.loading = true;
@@ -94,6 +96,10 @@ export class DropImages implements OnInit, OnDestroy {
   }
   
   ngOnDestroy(): void {
+    if (!this.isBrowser) {
+      return;
+    }
+
     window.removeEventListener('dragover', this.disableDefault);
     window.removeEventListener('drop', this.disableDefault);
   }
@@ -104,6 +110,10 @@ export class DropImages implements OnInit, OnDestroy {
   };
   
   ngOnInit(): void {
+    if (!this.isBrowser) {
+      return;
+    }
+
     window.addEventListener('dragover', this.disableDefault);
     window.addEventListener('drop', this.disableDefault);
   }
