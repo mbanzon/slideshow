@@ -44,6 +44,14 @@ export class SlideshowService {
       this.indicies = this.imageFiles.map((_, i) => i);
       if (this.randomized()) {
         this.indicies = this.indicies.sort(() => Math.random() - .5);
+      } else {
+        this.indicies = this.indicies.sort((a, b) => {
+          const fileA = this.imageFiles[a];
+          const fileB = this.imageFiles[b];
+          const pathA = `${fileA.webkitRelativePath}/${fileA.name}`;
+          const pathB = `${fileB.webkitRelativePath}/${fileB.name}`;
+          return pathA.localeCompare(pathB);
+        });
       }
     }],
     [STATE_RUNNING, () => {
