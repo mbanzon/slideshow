@@ -2,22 +2,22 @@
     <div class="flex flex-col gap-[32px] row-start-2 items-center justify-center sm:items-center">
         <div class="flex items-center space-x-2">
             <button
-                (click)="slideshowService.start()"
+                (click)="slideshowService.isPaused() ? slideshowService.resume() : slideshowService.start()"
                 class="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 dark:bg-white dark:text-black hover:dark:bg-gray-200"
             >
-            @if (slideshowService.isStopped()) {
-                Resume Slideshow
+            @if (slideshowService.isPaused() || slideshowService.isStopped()) {
+                Resume
             } @else {
-                Start Slideshow
+                Start
             }
             </button>
-        
+
             @if (slideshowService.isStopped()) {
                 <button
                     (click)="slideshowService.restart()"
                     class="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 dark:bg-white dark:text-black hover:dark:bg-gray-200"
                 >
-                    Restart Slideshow
+                    Restart
                 </button>
             }
         </div>
@@ -32,7 +32,7 @@
             />
             <label for="checkbox" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Random order</label>
         </div>
-
+        
         <div class="flex items-center space-x-2">
             <label for="interval" class="text-sm font-medium text-gray-700 dark:text-gray-300">Interval (seconds)</label>
             <input
