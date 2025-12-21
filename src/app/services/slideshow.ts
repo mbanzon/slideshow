@@ -16,7 +16,8 @@ import {
   STATE_NEW,
   STATE_PAUSED,
   STATE_RUNNING,
-  STATE_STOPPED
+  STATE_STOPPED,
+  STATE_STOPPED_PAUSED
 } from '../SlideshowStatemachine';
 
 @Injectable({
@@ -54,6 +55,9 @@ export class SlideshowService {
       this.updateCurrentImage();
     }],
     [STATE_STOPPED, () => {
+      this.stopTicker();
+    }],
+    [STATE_STOPPED_PAUSED, () => {
       this.stopTicker();
     }],
   ]);
@@ -112,8 +116,8 @@ export class SlideshowService {
   stop = () => this.action(ACTION_STOP);
 
   isStarted = () => [STATE_RUNNING, STATE_PAUSED].indexOf(this.stateMachine.getState()) != -1;
-  isPaused = () => STATE_PAUSED == this.stateMachine.getState();
-  isStopped = () => STATE_STOPPED == this.stateMachine.getState();
+  isPaused = () => [STATE_PAUSED, STATE_STOPPED_PAUSED].indexOf(this.stateMachine.getState()) != -1;
+  isStopped = () => [STATE_STOPPED, STATE_STOPPED_PAUSED].indexOf(this.stateMachine.getState()) != -1;
   hasImages = () => this.imageFiles.length > 0;
   imageCount = () => this.imageFiles.length;
 

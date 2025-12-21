@@ -3,6 +3,7 @@ export const STATE_HAS_IMAGES = 'loaded';
 export const STATE_RUNNING = 'started';
 export const STATE_PAUSED = 'paused';
 export const STATE_STOPPED = 'stopped';
+export const STATE_STOPPED_PAUSED = 'stopped_paused'
 
 export const ACTION_LOAD = 'load';
 export const ACTION_CLEAR = 'clear';
@@ -18,7 +19,8 @@ export type SlideshowState =
   typeof STATE_HAS_IMAGES |
   typeof STATE_RUNNING |
   typeof STATE_PAUSED |
-  typeof STATE_STOPPED;
+  typeof STATE_STOPPED |
+  typeof STATE_STOPPED_PAUSED;
 
 export type SlideshowAction =
   typeof ACTION_LOAD |
@@ -50,7 +52,7 @@ private static readonly actions = new Map<SlideshowState, Map<SlideshowAction, S
     ])],
     [STATE_PAUSED, new Map([
         [ACTION_RESUME, STATE_RUNNING],
-        [ACTION_STOP, STATE_STOPPED],
+        [ACTION_STOP, STATE_STOPPED_PAUSED],
         [ACTION_NEXT, STATE_PAUSED],
         [ACTION_PREVIOUS, STATE_PAUSED],
     ])],
@@ -59,6 +61,12 @@ private static readonly actions = new Map<SlideshowState, Map<SlideshowAction, S
         [ACTION_START, STATE_RUNNING],
         [ACTION_CLEAR, STATE_NEW],
         [ACTION_LOAD, STATE_HAS_IMAGES],
+    ])],
+    [STATE_STOPPED_PAUSED, new Map([
+        [ACTION_RESUME, STATE_PAUSED],
+        [ACTION_CLEAR, STATE_NEW],
+        [ACTION_LOAD, STATE_HAS_IMAGES],
+        [ACTION_START, STATE_PAUSED]
     ])],
 ]);
   private state : SlideshowState = STATE_NEW;
