@@ -1,4 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { DropImages } from "./components/drop-images/drop-images";
 import { SlideshowService } from './services/slideshow';
 import { ImageCount } from "./components/image-count/image-count";
@@ -14,8 +15,13 @@ import { SlideshowPlayer } from './components/slideshow-player/slideshow-player'
 export class App implements OnInit {
   slideshowService = inject(SlideshowService);
   showDescription = false;
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   ngOnInit(): void {
+    if (!this.isBrowser) {
+      return;
+    }
+
     window.addEventListener('beforeunload', e => {
       if (this.slideshowService.hasImages()) {
         e.preventDefault();
@@ -26,6 +32,10 @@ export class App implements OnInit {
   }
 
   setFaviconString(emoji:string) {
+    if (!this.isBrowser) {
+      return;
+    }
+
     // Create a canvas to draw the emoji
     const canvas = document.createElement("canvas");
     canvas.width = 64;
