@@ -30,13 +30,11 @@ export class SlideshowService {
   interval = signal<number>(5);
   currentImgSrc = signal<string | null>(null);
   isLoading = signal<boolean>(false);
-  countdown = signal<number>(0);
+  progressKey = signal<number>(0);
 
   private indicies : number[] = [];
   private indexIndex : number = 0;
   private ticker : ReturnType<typeof setTimeout> | null = null;
-  private countdownTicker : ReturnType<typeof setInterval> | null = null;
-  private nextTickAt : number | null = null;
 
   private stateMachine = new SlideshowStatemachine();
 
@@ -101,21 +99,13 @@ export class SlideshowService {
       clearTimeout(this.ticker);
       this.ticker = null;
     }
-    if (this.countdownTicker != null) {
-      clearInterval(this.countdownTicker);
-      this.countdownTicker = null;
-    }
-    this.nextTickAt = null;
-    this.countdown.set(0);
   }
 
   private startTicker() {
     this.stopTicker();
 
     const intervalMs = this.interval() * 1000;
-    this.nextTickAt = Date.now() + intervalMs;
-    this.countdown.set(this.interval());
-    this.startCountdownTicker();
+    this.progressKey.update((value) => value + 1);
 
     this.ticker = setTimeout(() => {
       if (this.stateMachine.getState() !== STATE_RUNNING) {
@@ -123,20 +113,6 @@ export class SlideshowService {
       }
       this.next();
     }, intervalMs);
-  }
-
-  private startCountdownTicker() {
-    if (this.countdownTicker != null) {
-      clearInterval(this.countdownTicker);
-    }
-    this.countdownTicker = setInterval(() => {
-      if (this.nextTickAt == null) {
-        return;
-      }
-      const remainingMs = this.nextTickAt - Date.now();
-      const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
-      this.countdown.set(remainingSeconds);
-    }, 200);
   }
 
   next() {
@@ -188,6 +164,6 @@ export class SlideshowService {
     this.ticker = null;
     this.currentImgSrc.set(null);
     this.isLoading.set(false);
-    this.countdown.set(0);
+    this.progressKey.set(0);
   }
 }
