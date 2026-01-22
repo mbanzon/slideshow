@@ -1,5 +1,15 @@
 @if (slideshowService.currentImgSrc() != null) {
     <div class="fixed inset-0 flex flex-col items-center justify-center bg-black">
+        <div class="loading-indicator-wrap">
+            @if (slideshowService.isLoading()) {
+                <div class="loading-indicator" aria-label="Loading image"></div>
+            }
+            @if (slideshowService.isRunning()) {
+                <div class="loading-countdown" aria-label="Time until next image">
+                    {{ slideshowService.countdown() }}
+                </div>
+            }
+        </div>
         
         <img
             [src]="slideshowService.currentImgSrc()"
