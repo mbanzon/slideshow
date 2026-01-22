@@ -24,40 +24,11 @@
   width: 100%;
   background: rgba(255, 255, 255, 0.85);
   transform-origin: left center;
-  animation-duration: var(--countdown-duration, 5s);
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-  animation-iteration-count: 1;
-}
-
-.countdown-bar-a {
-  animation-name: countdown-bar-a;
-}
-
-.countdown-bar-b {
-  animation-name: countdown-bar-b;
+  transform: scaleX(0);
 }
 
 @keyframes spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@keyframes countdown-bar-a {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
-  }
-}
-
-@keyframes countdown-bar-b {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
   }
 }

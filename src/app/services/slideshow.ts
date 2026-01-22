@@ -30,11 +30,15 @@ export class SlideshowService {
   interval = signal<number>(5);
   currentImgSrc = signal<string | null>(null);
   isLoading = signal<boolean>(false);
-  progressKey = signal<number>(0);
+  countdownProgress = signal<number>(0);
 
   private indicies : number[] = [];
   private indexIndex : number = 0;
   private ticker : ReturnType<typeof setTimeout> | null = null;
+  private countdownTicker : ReturnType<typeof setInterval> | null = null;
+  private nextTickAt : number | null = null;
+  private countdownIntervalMs : number = 0;
+  private readonly countdownLeadMs : number = 150;
 
   private stateMachine = new SlideshowStatemachine();
 
@@ -58,7 +62,6 @@ export class SlideshowService {
     }],
     [STATE_RUNNING, () => {
       this.updateCurrentImage();
-      this.startTicker();
     }],
     [STATE_PAUSED, () => {
       this.stopTicker();
@@ -99,13 +102,23 @@ export class SlideshowService {
       clearTimeout(this.ticker);
       this.ticker = null;
     }
+    if (this.countdownTicker != null) {
+      clearInterval(this.countdownTicker);
+      this.countdownTicker = null;
+    }
+    this.nextTickAt = null;
+    this.countdownIntervalMs = 0;
+    this.countdownProgress.set(0);
   }
 
   private startTicker() {
     this.stopTicker();
 
     const intervalMs = this.interval() * 1000;
-    this.progressKey.update((value) => value + 1);
+    this.countdownIntervalMs = intervalMs;
+    this.nextTickAt = Date.now() + intervalMs;
+    this.countdownProgress.set(1);
+    this.startCountdownTicker();
 
     this.ticker = setTimeout(() => {
       if (this.stateMachine.getState() !== STATE_RUNNING) {
@@ -113,6 +126,22 @@ export class SlideshowService {
       }
       this.next();
     }, intervalMs);
+  }
+
+  private startCountdownTicker() {
+    if (this.countdownTicker != null) {
+      clearInterval(this.countdownTicker);
+    }
+    this.countdownTicker = setInterval(() => {
+      if (this.nextTickAt == null || this.countdownIntervalMs <= 0) {
+        this.countdownProgress.set(0);
+        return;
+      }
+      const remainingMs = this.nextTickAt - Date.now();
+      const adjustedRemainingMs = Math.max(0, remainingMs - this.countdownLeadMs);
+      const progress = Math.min(1, Math.max(0, adjustedRemainingMs / this.countdownIntervalMs));
+      this.countdownProgress.set(progress);
+    }, 50);
   }
 
   next() {
@@ -145,25 +174,32 @@ export class SlideshowService {
   imageCount = () => this.imageFiles.length;
 
   private updateCurrentImage() {
+    this.stopTicker();
     const reader = new FileReader();
     this.isLoading.set(true);
     reader.onload = () => {
       this.currentImgSrc.set(reader.result as string);
       this.isLoading.set(false);
+      if (this.stateMachine.getState() === STATE_RUNNING) {
+        this.startTicker();
+      }
     };
     reader.onerror = () => {
       this.isLoading.set(false);
+      if (this.stateMachine.getState() === STATE_RUNNING) {
+        this.startTicker();
+      }
     };
     reader.readAsDataURL(this.imageFiles[this.indicies[this.indexIndex]]);
   }
 
   private resetAll() {
+    this.stopTicker();
     this.imageFiles = [];
     this.indicies = [];
     this.indexIndex = 0;
-    this.ticker = null;
     this.currentImgSrc.set(null);
     this.isLoading.set(false);
-    this.progressKey.set(0);
+    this.countdownProgress.set(0);
   }
 }
