@@ -117,7 +117,7 @@ export class SlideshowService {
     const intervalMs = this.interval() * 1000;
     this.countdownIntervalMs = intervalMs;
     this.nextTickAt = Date.now() + intervalMs;
-    this.countdownProgress.set(1);
+    this.countdownProgress.set(0);
     this.startCountdownTicker();
 
     this.ticker = setTimeout(() => {
@@ -139,7 +139,7 @@ export class SlideshowService {
       }
       const remainingMs = this.nextTickAt - Date.now();
       const adjustedRemainingMs = Math.max(0, remainingMs - this.countdownLeadMs);
-      const progress = Math.min(1, Math.max(0, adjustedRemainingMs / this.countdownIntervalMs));
+      const progress = Math.min(1, Math.max(0, 1 - (adjustedRemainingMs / this.countdownIntervalMs)));
       this.countdownProgress.set(progress);
     }, 50);
   }
