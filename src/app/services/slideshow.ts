@@ -25,6 +25,8 @@ import {
 })
 export class SlideshowService {
   private imageFiles : File[] = [];
+  private readonly preloadAheadCount : number = 2;
+  private readonly preloadBehindCount : number = 1;
 
   randomized = signal<boolean>(false);
   interval = signal<number>(5);
@@ -39,6 +41,9 @@ export class SlideshowService {
   private nextTickAt : number | null = null;
   private countdownIntervalMs : number = 0;
   private readonly countdownLeadMs : number = 150;
+  private currentLoadToken : number = 0;
+  private preloadedImageSrcByIndex = new Map<number, string>();
+  private loadingImageSrcByIndex = new Map<number, Promise<string>>();
 
   private stateMachine = new SlideshowStatemachine();
 
@@ -59,6 +64,9 @@ export class SlideshowService {
           return pathA.localeCompare(pathB);
         });
       }
+      this.indexIndex = Math.min(this.indexIndex, Math.max(0, this.indicies.length - 1));
+      this.resetPreloadCache();
+      this.preloadNextImages();
     }],
     [STATE_RUNNING, () => {
       this.updateCurrentImage();
@@ -175,22 +183,136 @@ export class SlideshowService {
 
   private updateCurrentImage() {
     this.stopTicker();
-    const reader = new FileReader();
+    const currentImageIndex = this.getImageIndexAtPosition(this.indexIndex);
+    if (currentImageIndex == null) {
+      this.currentImgSrc.set(null);
+      this.isLoading.set(false);
+      return;
+    }
+    const loadToken = ++this.currentLoadToken;
+    const cachedImageSrc = this.preloadedImageSrcByIndex.get(currentImageIndex);
+    if (cachedImageSrc != null) {
+      this.currentImgSrc.set(cachedImageSrc);
+      this.isLoading.set(false);
+      this.preloadNextImages();
+      this.prunePreloadCache();
+      if (this.stateMachine.getState() === STATE_RUNNING) {
+        this.startTicker();
+      }
+      return;
+    }
     this.isLoading.set(true);
-    reader.onload = () => {
-      this.currentImgSrc.set(reader.result as string);
+    this.loadImageSrc(currentImageIndex).then((src) => {
+      if (loadToken !== this.currentLoadToken) {
+        return;
+      }
+      this.currentImgSrc.set(src);
+      this.isLoading.set(false);
+      this.preloadNextImages();
+      this.prunePreloadCache();
+      if (this.stateMachine.getState() === STATE_RUNNING) {
+        this.startTicker();
+      }
+    }).catch(() => {
+      if (loadToken !== this.currentLoadToken) {
+        return;
+      }
       this.isLoading.set(false);
       if (this.stateMachine.getState() === STATE_RUNNING) {
         this.startTicker();
       }
-    };
-    reader.onerror = () => {
-      this.isLoading.set(false);
-      if (this.stateMachine.getState() === STATE_RUNNING) {
-        this.startTicker();
+    });
+  }
+
+  private getImageIndexAtPosition(position: number): number | null {
+    if (this.indicies.length === 0) {
+      return null;
+    }
+    const normalizedPosition = ((position % this.indicies.length) + this.indicies.length) % this.indicies.length;
+    return this.indicies[normalizedPosition];
+  }
+
+  private readFileAsDataURL(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = () => {
+        reject(reader.error);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  private loadImageSrc(imageIndex: number): Promise<string> {
+    const cachedSrc = this.preloadedImageSrcByIndex.get(imageIndex);
+    if (cachedSrc != null) {
+      return Promise.resolve(cachedSrc);
+    }
+
+    const pendingLoad = this.loadingImageSrcByIndex.get(imageIndex);
+    if (pendingLoad != null) {
+      return pendingLoad;
+    }
+
+    const file = this.imageFiles[imageIndex];
+    if (file == null) {
+      return Promise.reject(new Error(`Image index ${imageIndex} is not available`));
+    }
+
+    const loadPromise = this.readFileAsDataURL(file)
+      .then((src) => {
+        this.preloadedImageSrcByIndex.set(imageIndex, src);
+        this.loadingImageSrcByIndex.delete(imageIndex);
+        return src;
+      })
+      .catch((error) => {
+        this.loadingImageSrcByIndex.delete(imageIndex);
+        throw error;
+      });
+
+    this.loadingImageSrcByIndex.set(imageIndex, loadPromise);
+    return loadPromise;
+  }
+
+  private preloadNextImages() {
+    for (let offset = 1; offset <= this.preloadAheadCount; offset++) {
+      const imageIndex = this.getImageIndexAtPosition(this.indexIndex + offset);
+      if (imageIndex == null) {
+        continue;
       }
-    };
-    reader.readAsDataURL(this.imageFiles[this.indicies[this.indexIndex]]);
+      void this.loadImageSrc(imageIndex);
+    }
+  }
+
+  private prunePreloadCache() {
+    if (this.indicies.length === 0) {
+      this.resetPreloadCache();
+      return;
+    }
+    const imageIndicesToKeep = new Set<number>();
+    for (let offset = -this.preloadBehindCount; offset <= this.preloadAheadCount; offset++) {
+      const imageIndex = this.getImageIndexAtPosition(this.indexIndex + offset);
+      if (imageIndex != null) {
+        imageIndicesToKeep.add(imageIndex);
+      }
+    }
+    for (const imageIndex of Array.from(this.preloadedImageSrcByIndex.keys())) {
+      if (!imageIndicesToKeep.has(imageIndex)) {
+        this.preloadedImageSrcByIndex.delete(imageIndex);
+      }
+    }
+    for (const imageIndex of Array.from(this.loadingImageSrcByIndex.keys())) {
+      if (!imageIndicesToKeep.has(imageIndex)) {
+        this.loadingImageSrcByIndex.delete(imageIndex);
+      }
+    }
+  }
+
+  private resetPreloadCache() {
+    this.preloadedImageSrcByIndex.clear();
+    this.loadingImageSrcByIndex.clear();
   }
 
   private resetAll() {
@@ -198,6 +320,8 @@ export class SlideshowService {
     this.imageFiles = [];
     this.indicies = [];
     this.indexIndex = 0;
+    this.currentLoadToken++;
+    this.resetPreloadCache();
     this.currentImgSrc.set(null);
     this.isLoading.set(false);
     this.countdownProgress.set(0);
