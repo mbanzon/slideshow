@@ -27,6 +27,10 @@
   transform: scaleX(0);
 }
 
+.cursor-hidden {
+  cursor: none;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

@@ -16,7 +16,11 @@
         <img
             [src]="slideshowService.currentImgSrc()"
             alt="Slideshow"
-            class="max-w-full max-h-full object-contain cursor-none"
+            class="max-w-full max-h-full object-contain"
+            [class.cursor-hidden]="shouldHideCursor()"
+            (mousemove)="onImageMouseMove()"
+            (mouseenter)="onImageMouseEnter()"
+            (mouseleave)="onImageMouseLeave()"
             (click)="slideshowService.isRunning() && slideshowService.pause()"
             />
         
