@@ -45,6 +45,11 @@
   background: #d1d5db;
 }
 
+.controls.controls-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

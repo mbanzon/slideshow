@@ -24,7 +24,17 @@
             (click)="slideshowService.isRunning() && slideshowService.pause()"
             />
         
-        <div class="absolute bottom-4 right-4 flex gap-4 opacity-25 hover:opacity-100 transition-opacity p-8">
+        <div
+            class="controls absolute bottom-4 right-4 flex gap-4 opacity-25 hover:opacity-100 transition-opacity p-8"
+            [class.controls-hidden]="shouldHideControls()"
+        >
+            <button
+                (click)="toggleFullscreen()"
+                class="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                [disabled]="!isFullscreenAvailable()"
+            >
+                @if (isFullscreen) { Exit Full Screen } @else { Full Screen }
+            </button>
             
             <button
                 (click)="slideshowService.isPaused() ? slideshowService.resume() : slideshowService.pause()"
