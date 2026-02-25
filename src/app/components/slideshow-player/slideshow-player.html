@@ -28,30 +28,38 @@
             
             <button
                 (click)="slideshowService.isPaused() ? slideshowService.resume() : slideshowService.pause()"
-                class="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300"
+                class="control-button"
+                [attr.aria-label]="slideshowService.isPaused() ? 'Resume slideshow' : 'Pause slideshow'"
+                [attr.title]="slideshowService.isPaused() ? 'Resume slideshow' : 'Pause slideshow'"
                 >
-                @if (slideshowService.isPaused()) { Resume } @else { Pause }
+                @if (slideshowService.isPaused()) { &#9654; } @else { &#9208; }
             </button>
         
             <button
                 (click)="slideshowService.stop()"
-                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                class="control-button"
+                aria-label="Stop slideshow"
+                title="Stop slideshow"
                 >
-                Stop
+                &#9209;
             </button>
     
             <button
                 (click)="slideshowService.previous()"
-                class="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300"
+                class="control-button"
+                aria-label="Previous image"
+                title="Previous image"
             >
-            &lt;&lt;
+            &#9198;
             </button>
     
             <button
                 (click)="slideshowService.next()"
-                class="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300"
+                class="control-button"
+                aria-label="Next image"
+                title="Next image"
                 >
-                &gt;&gt;
+                &#9197;
             </button>
     
         </div>

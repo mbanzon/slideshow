@@ -86,4 +86,25 @@ describe('SlideshowPlayer', () => {
 
     expect(component.shouldHideCursor()).toBeFalse();
   }));
+
+  it('should render compact symbolic controls with a shared button style', () => {
+    const controlButtons = Array.from(
+      fixture.nativeElement.querySelectorAll('.control-button')
+    ) as HTMLButtonElement[];
+
+    expect(controlButtons.length).toBe(4);
+    expect(controlButtons.map((button) => button.textContent?.trim()))
+      .toEqual(['⏸', '⏹', '⏮', '⏭']);
+  });
+
+  it('should render the play symbol when slideshow is paused', () => {
+    slideshowServiceMock.isPaused.and.returnValue(true);
+    fixture.detectChanges();
+
+    const controlButtons = Array.from(
+      fixture.nativeElement.querySelectorAll('.control-button')
+    ) as HTMLButtonElement[];
+
+    expect(controlButtons[0].textContent?.trim()).toBe('▶');
+  });
 });
