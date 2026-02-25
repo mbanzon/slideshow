@@ -40,6 +40,8 @@ describe('SlideshowPlayer', () => {
   });
 
   beforeEach(async () => {
+    fullscreenEnabled = true;
+    fullscreenElement = null;
     slideshowServiceMock = createSlideshowServiceMock();
     await TestBed.configureTestingModule({
       imports: [SlideshowPlayer],
@@ -80,11 +82,6 @@ describe('SlideshowPlayer', () => {
     fixture = TestBed.createComponent(SlideshowPlayer);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  beforeEach(() => {
-    fullscreenEnabled = true;
-    fullscreenElement = null;
   });
 
   it('should create', () => {
@@ -128,7 +125,7 @@ describe('SlideshowPlayer', () => {
 
   it('should render compact symbolic controls with a shared button style', () => {
     const controlButtons = Array.from(
-      fixture.nativeElement.querySelectorAll('.control-button')
+      fixture.nativeElement.querySelectorAll('.playback-control-button')
     ) as HTMLButtonElement[];
 
     expect(controlButtons.length).toBe(4);
@@ -141,10 +138,20 @@ describe('SlideshowPlayer', () => {
     fixture.detectChanges();
 
     const controlButtons = Array.from(
-      fixture.nativeElement.querySelectorAll('.control-button')
+      fixture.nativeElement.querySelectorAll('.playback-control-button')
     ) as HTMLButtonElement[];
 
     expect(controlButtons[0].textContent?.trim()).toBe('▶');
+  });
+
+  it('should render the fullscreen toggle as an icon button', () => {
+    const fullscreenButton = fixture.nativeElement.querySelector('.fullscreen-toggle-button') as HTMLButtonElement;
+    expect(fullscreenButton.textContent?.trim()).toBe('⤢');
+
+    component.isFullscreen = true;
+    fixture.detectChanges();
+
+    expect(fullscreenButton.textContent?.trim()).toBe('⤡');
   });
 
   it('should enter fullscreen when not already fullscreen', async () => {

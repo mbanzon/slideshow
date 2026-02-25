@@ -30,15 +30,17 @@
         >
             <button
                 (click)="toggleFullscreen()"
-                class="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                class="control-button fullscreen-toggle-button disabled:opacity-60 disabled:cursor-not-allowed"
                 [disabled]="!isFullscreenAvailable()"
+                [attr.aria-label]="isFullscreen ? 'Exit full screen' : 'Enter full screen'"
+                [attr.title]="isFullscreen ? 'Exit full screen' : 'Enter full screen'"
             >
-                @if (isFullscreen) { Exit Full Screen } @else { Full Screen }
+                @if (isFullscreen) { &#x2921; } @else { &#x2922; }
             </button>
             
             <button
                 (click)="slideshowService.isPaused() ? slideshowService.resume() : slideshowService.pause()"
-                class="control-button"
+                class="control-button playback-control-button"
                 [attr.aria-label]="slideshowService.isPaused() ? 'Resume slideshow' : 'Pause slideshow'"
                 [attr.title]="slideshowService.isPaused() ? 'Resume slideshow' : 'Pause slideshow'"
                 >
@@ -47,7 +49,7 @@
         
             <button
                 (click)="slideshowService.stop()"
-                class="control-button"
+                class="control-button playback-control-button"
                 aria-label="Stop slideshow"
                 title="Stop slideshow"
                 >
@@ -56,7 +58,7 @@
     
             <button
                 (click)="slideshowService.previous()"
-                class="control-button"
+                class="control-button playback-control-button"
                 aria-label="Previous image"
                 title="Previous image"
             >
@@ -65,7 +67,7 @@
     
             <button
                 (click)="slideshowService.next()"
-                class="control-button"
+                class="control-button playback-control-button"
                 aria-label="Next image"
                 title="Next image"
                 >
