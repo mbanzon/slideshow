@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
@@ -7,6 +8,11 @@ import { SlideshowService } from '../../services/slideshow';
 describe('SlideshowPlayer', () => {
   let component: SlideshowPlayer;
   let fixture: ComponentFixture<SlideshowPlayer>;
+  let fullScreenDocument: Document;
+  let fullscreenEnabled = true;
+  let fullscreenElement: Element | null = null;
+  let requestFullscreenSpy: jasmine.Spy<() => Promise<void>>;
+  let exitFullscreenSpy: jasmine.Spy<() => Promise<void>>;
   let slideshowServiceMock: {
     currentImgSrc: WritableSignal<string | null>;
     isLoading: WritableSignal<boolean>;
@@ -43,9 +49,42 @@ describe('SlideshowPlayer', () => {
     })
     .compileComponents();
 
+    fullScreenDocument = TestBed.inject(DOCUMENT);
+    Object.defineProperty(fullScreenDocument, 'fullscreenEnabled', {
+      configurable: true,
+      get: () => fullscreenEnabled
+    });
+    Object.defineProperty(fullScreenDocument, 'fullscreenElement', {
+      configurable: true,
+      get: () => fullscreenElement
+    });
+
+    requestFullscreenSpy = jasmine.createSpy('requestFullscreen')
+      .and.callFake(async () => {
+        fullscreenElement = fullScreenDocument.documentElement;
+      });
+    exitFullscreenSpy = jasmine.createSpy('exitFullscreen')
+      .and.callFake(async () => {
+        fullscreenElement = null;
+      });
+
+    Object.defineProperty(fullScreenDocument.documentElement, 'requestFullscreen', {
+      configurable: true,
+      value: requestFullscreenSpy
+    });
+    Object.defineProperty(fullScreenDocument, 'exitFullscreen', {
+      configurable: true,
+      value: exitFullscreenSpy
+    });
+
     fixture = TestBed.createComponent(SlideshowPlayer);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  beforeEach(() => {
+    fullscreenEnabled = true;
+    fullscreenElement = null;
   });
 
   it('should create', () => {
@@ -86,4 +125,46 @@ describe('SlideshowPlayer', () => {
 
     expect(component.shouldHideCursor()).toBeFalse();
   }));
+
+  it('should enter fullscreen when not already fullscreen', async () => {
+    await component.toggleFullscreen();
+
+    expect(requestFullscreenSpy).toHaveBeenCalled();
+    expect(exitFullscreenSpy).not.toHaveBeenCalled();
+  });
+
+  it('should exit fullscreen when already fullscreen', async () => {
+    fullscreenElement = fullScreenDocument.documentElement;
+
+    await component.toggleFullscreen();
+
+    expect(exitFullscreenSpy).toHaveBeenCalled();
+    expect(requestFullscreenSpy).not.toHaveBeenCalled();
+  });
+
+  it('should hide controls only when fullscreen and cursor are hidden', fakeAsync(() => {
+    slideshowServiceMock.isRunning.and.returnValue(true);
+    component.onImageMouseMove();
+    tick(2000);
+
+    expect(component.shouldHideControls()).toBeFalse();
+    component.isFullscreen = true;
+    expect(component.shouldHideControls()).toBeTrue();
+  }));
+
+  it('should update fullscreen state after fullscreenchange events', () => {
+    fullscreenElement = fullScreenDocument.documentElement;
+    fullScreenDocument.dispatchEvent(new Event('fullscreenchange'));
+    expect(component.isFullscreen).toBeTrue();
+
+    fullscreenElement = null;
+    fullScreenDocument.dispatchEvent(new Event('fullscreenchange'));
+    expect(component.isFullscreen).toBeFalse();
+  });
+
+  it('should report fullscreen as unavailable when browser support is disabled', () => {
+    fullscreenEnabled = false;
+
+    expect(component.isFullscreenAvailable()).toBeFalse();
+  });
 });
