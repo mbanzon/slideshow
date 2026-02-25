@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { Component, DoCheck, inject, OnDestroy } from '@angular/core';
 import { SlideshowService } from '../../services/slideshow';
 
@@ -9,10 +10,21 @@ import { SlideshowService } from '../../services/slideshow';
 })
 export class SlideshowPlayer implements DoCheck, OnDestroy {
   slideshowService = inject(SlideshowService);
+  private readonly document = inject(DOCUMENT);
   private readonly hideCursorDelayMs = 2000;
   private hideCursorTimeout: ReturnType<typeof setTimeout> | null = null;
   private cursorHidden = false;
   private wasRunning = this.slideshowService.isRunning();
+  isFullscreen = false;
+
+  private readonly fullscreenChangeHandler = () => {
+    this.isFullscreen = this.document.fullscreenElement != null;
+  };
+
+  constructor() {
+    this.isFullscreen = this.document.fullscreenElement != null;
+    this.document.addEventListener('fullscreenchange', this.fullscreenChangeHandler);
+  }
 
   onImageMouseMove() {
     if (!this.slideshowService.isRunning()) {
@@ -42,6 +54,29 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
     return this.slideshowService.isRunning() && this.cursorHidden;
   }
 
+  shouldHideControls() {
+    return this.isFullscreen && this.shouldHideCursor();
+  }
+
+  async toggleFullscreen() {
+    if (!this.isFullscreenAvailable()) {
+      return;
+    }
+
+    if (this.document.fullscreenElement != null) {
+      await this.document.exitFullscreen();
+      return;
+    }
+
+    await this.document.documentElement.requestFullscreen();
+  }
+
+  isFullscreenAvailable() {
+    return this.document.fullscreenEnabled
+      && typeof this.document.documentElement.requestFullscreen === 'function'
+      && typeof this.document.exitFullscreen === 'function';
+  }
+
   ngDoCheck() {
     const isRunning = this.slideshowService.isRunning();
     if (this.wasRunning && !isRunning) {
@@ -53,6 +88,7 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
 
   ngOnDestroy() {
     this.clearHideCursorTimeout();
+    this.document.removeEventListener('fullscreenchange', this.fullscreenChangeHandler);
   }
 
   private startHideCursorTimeout() {
