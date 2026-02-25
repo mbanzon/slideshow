@@ -31,6 +31,20 @@
   cursor: none;
 }
 
+.control-button {
+  width: 42px;
+  height: 42px;
+  border-radius: 0.5rem;
+  background: #e5e7eb;
+  color: #111827;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.control-button:hover {
+  background: #d1d5db;
+}
+
 .controls.controls-hidden {
   opacity: 0;
   pointer-events: none;
