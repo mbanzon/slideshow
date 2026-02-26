@@ -19,7 +19,15 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   isFullscreen = false;
 
   private readonly fullscreenChangeHandler = () => {
+    const wasFullscreen = this.isFullscreen;
     this.isFullscreen = this.document.fullscreenElement != null;
+    if (
+      wasFullscreen
+      && !this.isFullscreen
+      && (this.slideshowService.isRunning() || this.slideshowService.isPaused())
+    ) {
+      this.slideshowService.stop();
+    }
     this.exitFullscreenIfStopped();
   };
 
@@ -92,6 +100,7 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   ngOnDestroy() {
     this.clearHideCursorTimeout();
     this.document.removeEventListener('fullscreenchange', this.fullscreenChangeHandler);
+    this.exitFullscreenIfActive();
   }
 
   private startHideCursorTimeout() {
@@ -131,5 +140,12 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
     void this.document.exitFullscreen().finally(() => {
       this.isExitingFullscreen = false;
     });
+  }
+
+  private exitFullscreenIfActive() {
+    if (this.document.fullscreenElement == null || typeof this.document.exitFullscreen !== 'function') {
+      return;
+    }
+    void this.document.exitFullscreen();
   }
 }
