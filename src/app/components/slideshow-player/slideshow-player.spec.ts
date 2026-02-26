@@ -195,4 +195,40 @@ describe('SlideshowPlayer', () => {
 
     expect(component.isFullscreenAvailable()).toBeFalse();
   });
+
+  it('should show a short fade when switching images', fakeAsync(() => {
+    const nextImageSrc = 'data:image/png;base64,def';
+    slideshowServiceMock.currentImgSrc.set(nextImageSrc);
+    fixture.detectChanges();
+
+    const baseImageDuringFade = fixture.nativeElement.querySelector('.base-image') as HTMLImageElement;
+    const incomingImageDuringFade = fixture.nativeElement.querySelector('.incoming-image') as HTMLImageElement;
+    expect(baseImageDuringFade.getAttribute('src')).toBe('data:image/png;base64,abc');
+    expect(baseImageDuringFade.classList).toContain('base-image-fading');
+    expect(incomingImageDuringFade.getAttribute('src')).toBe(nextImageSrc);
+    expect(incomingImageDuringFade.classList).toContain('incoming-image-visible');
+
+    tick(50);
+    fixture.detectChanges();
+
+    const baseImageAfterFade = fixture.nativeElement.querySelector('.base-image') as HTMLImageElement;
+    expect(baseImageAfterFade.getAttribute('src')).toBe(nextImageSrc);
+    expect(baseImageAfterFade.classList).not.toContain('base-image-fading');
+    expect(fixture.nativeElement.querySelector('.incoming-image')).toBeNull();
+  }));
+
+  it('should cancel a pending fade if image source returns to the current image', fakeAsync(() => {
+    slideshowServiceMock.currentImgSrc.set('data:image/png;base64,def');
+    fixture.detectChanges();
+
+    slideshowServiceMock.currentImgSrc.set('data:image/png;base64,abc');
+    fixture.detectChanges();
+    tick(50);
+    fixture.detectChanges();
+
+    const baseImage = fixture.nativeElement.querySelector('.base-image') as HTMLImageElement;
+    expect(baseImage.getAttribute('src')).toBe('data:image/png;base64,abc');
+    expect(baseImage.classList).not.toContain('base-image-fading');
+    expect(fixture.nativeElement.querySelector('.incoming-image')).toBeNull();
+  }));
 });

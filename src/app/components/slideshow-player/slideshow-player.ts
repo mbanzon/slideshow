@@ -12,9 +12,15 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   slideshowService = inject(SlideshowService);
   private readonly document = inject(DOCUMENT);
   private readonly hideCursorDelayMs = 2000;
+  private readonly imageTransitionMs = 50;
   private hideCursorTimeout: ReturnType<typeof setTimeout> | null = null;
+  private imageTransitionTimeout: ReturnType<typeof setTimeout> | null = null;
+  private lastSeenImageSrc = this.slideshowService.currentImgSrc();
   private cursorHidden = false;
   private wasRunning = this.slideshowService.isRunning();
+  currentImageSrc = this.lastSeenImageSrc;
+  transitioningImageSrc: string | null = null;
+  isImageTransitioning = false;
   isFullscreen = false;
 
   private readonly fullscreenChangeHandler = () => {
@@ -78,6 +84,12 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   }
 
   ngDoCheck() {
+    const currentImageSrc = this.slideshowService.currentImgSrc();
+    if (this.lastSeenImageSrc !== currentImageSrc) {
+      this.lastSeenImageSrc = currentImageSrc;
+      this.updateImageTransition(currentImageSrc);
+    }
+
     const isRunning = this.slideshowService.isRunning();
     if (this.wasRunning && !isRunning) {
       this.showCursor();
@@ -88,6 +100,7 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
 
   ngOnDestroy() {
     this.clearHideCursorTimeout();
+    this.clearImageTransitionTimeout();
     this.document.removeEventListener('fullscreenchange', this.fullscreenChangeHandler);
   }
 
@@ -111,5 +124,46 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
 
   private showCursor() {
     this.cursorHidden = false;
+  }
+
+  private updateImageTransition(nextImageSrc: string | null) {
+    this.clearImageTransitionTimeout();
+
+    if (nextImageSrc == null) {
+      this.currentImageSrc = null;
+      this.transitioningImageSrc = null;
+      this.isImageTransitioning = false;
+      return;
+    }
+
+    if (this.currentImageSrc == null) {
+      this.currentImageSrc = nextImageSrc;
+      this.transitioningImageSrc = null;
+      this.isImageTransitioning = false;
+      return;
+    }
+
+    if (nextImageSrc === this.currentImageSrc) {
+      this.transitioningImageSrc = null;
+      this.isImageTransitioning = false;
+      return;
+    }
+
+    this.transitioningImageSrc = nextImageSrc;
+    this.isImageTransitioning = true;
+    this.imageTransitionTimeout = setTimeout(() => {
+      this.currentImageSrc = this.transitioningImageSrc;
+      this.transitioningImageSrc = null;
+      this.isImageTransitioning = false;
+      this.imageTransitionTimeout = null;
+    }, this.imageTransitionMs);
+  }
+
+  private clearImageTransitionTimeout() {
+    if (this.imageTransitionTimeout == null) {
+      return;
+    }
+    clearTimeout(this.imageTransitionTimeout);
+    this.imageTransitionTimeout = null;
   }
 }

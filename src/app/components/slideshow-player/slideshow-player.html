@@ -1,4 +1,4 @@
-@if (slideshowService.currentImgSrc() != null) {
+@if (currentImageSrc != null) {
     <div class="fixed inset-0 flex flex-col items-center justify-center bg-black">
         @if (slideshowService.isRunning()) {
             <div
@@ -12,17 +12,32 @@
                 <div class="loading-indicator" aria-label="Loading image"></div>
             }
         </div>
-        
-        <img
-            [src]="slideshowService.currentImgSrc()"
-            alt="Slideshow"
-            class="max-w-full max-h-full object-contain"
+
+        <div
+            class="image-stage"
             [class.cursor-hidden]="shouldHideCursor()"
             (mousemove)="onImageMouseMove()"
             (mouseenter)="onImageMouseEnter()"
             (mouseleave)="onImageMouseLeave()"
             (click)="slideshowService.isRunning() && slideshowService.pause()"
+        >
+            <img
+                [src]="currentImageSrc"
+                alt="Slideshow"
+                class="slide-image base-image"
+                [class.base-image-fading]="isImageTransitioning"
             />
+
+            @if (transitioningImageSrc != null) {
+                <img
+                    [src]="transitioningImageSrc"
+                    alt=""
+                    aria-hidden="true"
+                    class="slide-image incoming-image"
+                    [class.incoming-image-visible]="isImageTransitioning"
+                />
+            }
+        </div>
         
         <div
             class="controls absolute bottom-4 right-4 flex gap-4 opacity-25 hover:opacity-100 transition-opacity p-8"
