@@ -18,6 +18,7 @@ describe('SlideshowPlayer', () => {
     isLoading: WritableSignal<boolean>;
     countdownProgress: WritableSignal<number>;
     isRunning: jasmine.Spy;
+    isStopped: jasmine.Spy;
     isPaused: jasmine.Spy;
     pause: jasmine.Spy;
     resume: jasmine.Spy;
@@ -31,6 +32,7 @@ describe('SlideshowPlayer', () => {
     isLoading: signal(false),
     countdownProgress: signal(0),
     isRunning: jasmine.createSpy('isRunning').and.returnValue(false),
+    isStopped: jasmine.createSpy('isStopped').and.returnValue(false),
     isPaused: jasmine.createSpy('isPaused').and.returnValue(false),
     pause: jasmine.createSpy('pause'),
     resume: jasmine.createSpy('resume'),
@@ -194,5 +196,25 @@ describe('SlideshowPlayer', () => {
     fullscreenEnabled = false;
 
     expect(component.isFullscreenAvailable()).toBeFalse();
+  });
+
+  it('should exit fullscreen when slideshow is stopped', async () => {
+    fullscreenElement = fullScreenDocument.documentElement;
+    slideshowServiceMock.isStopped.and.returnValue(true);
+
+    component.ngDoCheck();
+    await Promise.resolve();
+
+    expect(exitFullscreenSpy).toHaveBeenCalled();
+  });
+
+  it('should keep fullscreen when slideshow is not stopped', async () => {
+    fullscreenElement = fullScreenDocument.documentElement;
+    slideshowServiceMock.isStopped.and.returnValue(false);
+
+    component.ngDoCheck();
+    await Promise.resolve();
+
+    expect(exitFullscreenSpy).not.toHaveBeenCalled();
   });
 });

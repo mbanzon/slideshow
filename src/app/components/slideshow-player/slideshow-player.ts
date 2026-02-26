@@ -13,12 +13,14 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly hideCursorDelayMs = 2000;
   private hideCursorTimeout: ReturnType<typeof setTimeout> | null = null;
+  private isExitingFullscreen = false;
   private cursorHidden = false;
   private wasRunning = this.slideshowService.isRunning();
   isFullscreen = false;
 
   private readonly fullscreenChangeHandler = () => {
     this.isFullscreen = this.document.fullscreenElement != null;
+    this.exitFullscreenIfStopped();
   };
 
   constructor() {
@@ -83,6 +85,7 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
       this.showCursor();
       this.clearHideCursorTimeout();
     }
+    this.exitFullscreenIfStopped();
     this.wasRunning = isRunning;
   }
 
@@ -111,5 +114,22 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
 
   private showCursor() {
     this.cursorHidden = false;
+  }
+
+  private exitFullscreenIfStopped() {
+    if (this.isExitingFullscreen) {
+      return;
+    }
+    if (!this.slideshowService.isStopped()) {
+      return;
+    }
+    if (this.document.fullscreenElement == null || typeof this.document.exitFullscreen !== 'function') {
+      return;
+    }
+
+    this.isExitingFullscreen = true;
+    void this.document.exitFullscreen().finally(() => {
+      this.isExitingFullscreen = false;
+    });
   }
 }
