@@ -13,12 +13,22 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly hideCursorDelayMs = 2000;
   private hideCursorTimeout: ReturnType<typeof setTimeout> | null = null;
+  private isExitingFullscreen = false;
   private cursorHidden = false;
   private wasRunning = this.slideshowService.isRunning();
   isFullscreen = false;
 
   private readonly fullscreenChangeHandler = () => {
+    const wasFullscreen = this.isFullscreen;
     this.isFullscreen = this.document.fullscreenElement != null;
+    if (
+      wasFullscreen
+      && !this.isFullscreen
+      && (this.slideshowService.isRunning() || this.slideshowService.isPaused())
+    ) {
+      this.slideshowService.stop();
+    }
+    this.exitFullscreenIfStopped();
   };
 
   constructor() {
@@ -83,12 +93,14 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
       this.showCursor();
       this.clearHideCursorTimeout();
     }
+    this.exitFullscreenIfStopped();
     this.wasRunning = isRunning;
   }
 
   ngOnDestroy() {
     this.clearHideCursorTimeout();
     this.document.removeEventListener('fullscreenchange', this.fullscreenChangeHandler);
+    this.exitFullscreenIfActive();
   }
 
   private startHideCursorTimeout() {
@@ -111,5 +123,29 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
 
   private showCursor() {
     this.cursorHidden = false;
+  }
+
+  private exitFullscreenIfStopped() {
+    if (this.isExitingFullscreen) {
+      return;
+    }
+    if (!this.slideshowService.isStopped()) {
+      return;
+    }
+    if (this.document.fullscreenElement == null || typeof this.document.exitFullscreen !== 'function') {
+      return;
+    }
+
+    this.isExitingFullscreen = true;
+    void this.document.exitFullscreen().finally(() => {
+      this.isExitingFullscreen = false;
+    });
+  }
+
+  private exitFullscreenIfActive() {
+    if (this.document.fullscreenElement == null || typeof this.document.exitFullscreen !== 'function') {
+      return;
+    }
+    void this.document.exitFullscreen();
   }
 }

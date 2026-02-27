@@ -18,6 +18,7 @@ describe('SlideshowPlayer', () => {
     isLoading: WritableSignal<boolean>;
     countdownProgress: WritableSignal<number>;
     isRunning: jasmine.Spy;
+    isStopped: jasmine.Spy;
     isPaused: jasmine.Spy;
     pause: jasmine.Spy;
     resume: jasmine.Spy;
@@ -31,6 +32,7 @@ describe('SlideshowPlayer', () => {
     isLoading: signal(false),
     countdownProgress: signal(0),
     isRunning: jasmine.createSpy('isRunning').and.returnValue(false),
+    isStopped: jasmine.createSpy('isStopped').and.returnValue(false),
     isPaused: jasmine.createSpy('isPaused').and.returnValue(false),
     pause: jasmine.createSpy('pause'),
     resume: jasmine.createSpy('resume'),
@@ -123,6 +125,14 @@ describe('SlideshowPlayer', () => {
     expect(component.shouldHideCursor()).toBeFalse();
   }));
 
+  it('should exit fullscreen on destroy when fullscreen is active', () => {
+    fullscreenElement = fullScreenDocument.documentElement;
+
+    component.ngOnDestroy();
+
+    expect(exitFullscreenSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('should render compact symbolic controls with a shared button style', () => {
     const controlButtons = Array.from(
       fixture.nativeElement.querySelectorAll('.playback-control-button')
@@ -190,9 +200,41 @@ describe('SlideshowPlayer', () => {
     expect(component.isFullscreen).toBeFalse();
   });
 
+  it('should stop slideshow when exiting fullscreen while active', () => {
+    slideshowServiceMock.isRunning.and.returnValue(true);
+
+    fullscreenElement = fullScreenDocument.documentElement;
+    fullScreenDocument.dispatchEvent(new Event('fullscreenchange'));
+    expect(slideshowServiceMock.stop).not.toHaveBeenCalled();
+
+    fullscreenElement = null;
+    fullScreenDocument.dispatchEvent(new Event('fullscreenchange'));
+    expect(slideshowServiceMock.stop).toHaveBeenCalledTimes(1);
+  });
+
   it('should report fullscreen as unavailable when browser support is disabled', () => {
     fullscreenEnabled = false;
 
     expect(component.isFullscreenAvailable()).toBeFalse();
+  });
+
+  it('should exit fullscreen when slideshow is stopped', async () => {
+    fullscreenElement = fullScreenDocument.documentElement;
+    slideshowServiceMock.isStopped.and.returnValue(true);
+
+    component.ngDoCheck();
+    await Promise.resolve();
+
+    expect(exitFullscreenSpy).toHaveBeenCalled();
+  });
+
+  it('should keep fullscreen when slideshow is not stopped', async () => {
+    fullscreenElement = fullScreenDocument.documentElement;
+    slideshowServiceMock.isStopped.and.returnValue(false);
+
+    component.ngDoCheck();
+    await Promise.resolve();
+
+    expect(exitFullscreenSpy).not.toHaveBeenCalled();
   });
 });
