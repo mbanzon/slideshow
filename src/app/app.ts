@@ -5,6 +5,7 @@ import { SlideshowService } from './services/slideshow';
 import { ImageCount } from "./components/image-count/image-count";
 import { SlideshowConfig } from "./components/slideshow-config/slideshow-config";
 import { SlideshowPlayer } from './components/slideshow-player/slideshow-player';
+import { PwaUpdatesService } from './services/pwa-updates';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,7 @@ import { SlideshowPlayer } from './components/slideshow-player/slideshow-player'
 })
 export class App implements OnInit {
   slideshowService = inject(SlideshowService);
+  private readonly pwaUpdatesService = inject(PwaUpdatesService);
   showDescription = false;
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
@@ -21,6 +23,8 @@ export class App implements OnInit {
     if (!this.isBrowser) {
       return;
     }
+
+    this.pwaUpdatesService.initialize();
 
     window.addEventListener('beforeunload', e => {
       if (this.slideshowService.hasImages()) {
