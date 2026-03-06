@@ -1,10 +1,15 @@
 @if (!slideshowService.isStarted()) {
-  <div class="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-    <main class="flex flex-col gap-[32px] row-start-2 items-center justify-center sm:items-center">
+  <div class="landing-page grid grid-rows-[auto_1fr_auto] items-center justify-items-center min-h-dvh px-4 py-6 gap-6 sm:px-10 sm:py-10 sm:gap-12 font-[family-name:var(--font-geist-sans)]">
+    <main class="landing-main flex flex-col gap-5 sm:gap-8 row-start-2 items-center justify-center">
   
-      <img src="/slideshow.png" alt="Logo - it is a gorilla looking at frog pictures" [class]="slideshowService.hasImages() ? 'small-image' : ''" />
+      <img
+        src="/slideshow.png"
+        alt="Logo - it is a gorilla looking at frog pictures"
+        class="landing-logo"
+        [class.small-image]="slideshowService.hasImages()"
+      />
         
-      <h1 class="text-2xl font-bold">Slideshow 🚀</h1>
+      <h1 class="text-2xl font-bold text-center">Slideshow 🚀</h1>
   
       <app-drop-images></app-drop-images>
   
@@ -12,16 +17,16 @@
         
       <app-slideshow-config></app-slideshow-config>
           
-      <p class="mt-8 text-sm text-gray-500 text-center">
+      <p class="mt-3 sm:mt-8 text-sm text-gray-500 text-center px-2">
         with ❤️ from <a href="https://michaelbanzon.com/">Michael Banzon</a><br />
         the source is <a href="https://github.com/mbanzon/slideshow">on GitHub</a>.
       </p>
       
 
-      <p id="show-description" (click)="showDescription = !showDescription" class="text-sm text-gray-500 cursor-pointer">What is this?</p>
+      <p id="show-description" (click)="showDescription = !showDescription" class="text-sm text-gray-500 cursor-pointer text-center">What is this?</p>
 
       @if (showDescription) {
-        <p id="description" class="text-sm text-gray-500">
+        <p id="description" class="text-sm text-gray-500 text-center px-2">
           This is an app that let's you create a slideshow using your own images! No data is uploaded, everything
           happens on your machine.
         </p>

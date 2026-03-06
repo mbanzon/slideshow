@@ -24,19 +24,18 @@
             (click)="slideshowService.isRunning() && slideshowService.pause()"
             />
         
-        <div
-            class="controls absolute bottom-4 right-4 flex gap-4 opacity-25 hover:opacity-100 transition-opacity p-8"
-            [class.controls-hidden]="shouldHideControls()"
-        >
-            <button
-                (click)="toggleFullscreen()"
-                class="control-button fullscreen-toggle-button disabled:opacity-60 disabled:cursor-not-allowed"
-                [disabled]="!isFullscreenAvailable()"
-                [attr.aria-label]="isFullscreen ? 'Exit full screen' : 'Enter full screen'"
-                [attr.title]="isFullscreen ? 'Exit full screen' : 'Enter full screen'"
-            >
-                @if (isFullscreen) { &#x2921; } @else { &#x2922; }
-            </button>
+        <div class="controls" [class.controls-hidden]="shouldHideControls()">
+            @if (!isMobileDevice()) {
+                <button
+                    (click)="toggleFullscreen()"
+                    class="control-button fullscreen-toggle-button disabled:opacity-60 disabled:cursor-not-allowed"
+                    [disabled]="!isFullscreenAvailable()"
+                    [attr.aria-label]="isFullscreen ? 'Exit full screen' : 'Enter full screen'"
+                    [attr.title]="isFullscreen ? 'Exit full screen' : 'Enter full screen'"
+                >
+                    @if (isFullscreen) { &#x2921; } @else { &#x2922; }
+                </button>
+            }
             
             <button
                 (click)="slideshowService.isPaused() ? slideshowService.resume() : slideshowService.pause()"

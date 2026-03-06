@@ -1,5 +1,5 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, DoCheck, inject, OnDestroy } from '@angular/core';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { Component, DoCheck, inject, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { SlideshowService } from '../../services/slideshow';
 
 @Component({
@@ -11,6 +11,9 @@ import { SlideshowService } from '../../services/slideshow';
 export class SlideshowPlayer implements DoCheck, OnDestroy {
   slideshowService = inject(SlideshowService);
   private readonly document = inject(DOCUMENT);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
+  private readonly mobileMediaQuery = '(max-width: 768px), (pointer: coarse)';
   private readonly hideCursorDelayMs = 2000;
   private hideCursorTimeout: ReturnType<typeof setTimeout> | null = null;
   private isExitingFullscreen = false;
@@ -21,6 +24,9 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   private readonly fullscreenChangeHandler = () => {
     const wasFullscreen = this.isFullscreen;
     this.isFullscreen = this.document.fullscreenElement != null;
+    if (this.isMobileDevice()) {
+      return;
+    }
     if (
       wasFullscreen
       && !this.isFullscreen
@@ -65,11 +71,14 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   }
 
   shouldHideControls() {
+    if (this.isMobileDevice()) {
+      return false;
+    }
     return this.isFullscreen && this.shouldHideCursor();
   }
 
   async toggleFullscreen() {
-    if (!this.isFullscreenAvailable()) {
+    if (!this.isFullscreenAvailable() || this.isMobileDevice()) {
       return;
     }
 
@@ -82,9 +91,20 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   }
 
   isFullscreenAvailable() {
+    if (this.isMobileDevice()) {
+      return false;
+    }
+
     return this.document.fullscreenEnabled
       && typeof this.document.documentElement.requestFullscreen === 'function'
       && typeof this.document.exitFullscreen === 'function';
+  }
+
+  isMobileDevice() {
+    if (!this.isBrowser || typeof window.matchMedia !== 'function') {
+      return false;
+    }
+    return window.matchMedia(this.mobileMediaQuery).matches;
   }
 
   ngDoCheck() {
@@ -126,6 +146,9 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   }
 
   private exitFullscreenIfStopped() {
+    if (this.isMobileDevice()) {
+      return;
+    }
     if (this.isExitingFullscreen) {
       return;
     }
@@ -143,6 +166,9 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   }
 
   private exitFullscreenIfActive() {
+    if (this.isMobileDevice()) {
+      return;
+    }
     if (this.document.fullscreenElement == null || typeof this.document.exitFullscreen !== 'function') {
       return;
     }

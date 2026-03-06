@@ -11,6 +11,7 @@ describe('SlideshowPlayer', () => {
   let fullScreenDocument: Document;
   let fullscreenEnabled = true;
   let fullscreenElement: Element | null = null;
+  let isMobileViewport = false;
   let requestFullscreenSpy: jasmine.Spy<() => Promise<void>>;
   let exitFullscreenSpy: jasmine.Spy<() => Promise<void>>;
   let slideshowServiceMock: {
@@ -44,7 +45,37 @@ describe('SlideshowPlayer', () => {
   beforeEach(async () => {
     fullscreenEnabled = true;
     fullscreenElement = null;
+    isMobileViewport = false;
     slideshowServiceMock = createSlideshowServiceMock();
+
+    if (typeof window.matchMedia !== 'function') {
+      Object.defineProperty(window, 'matchMedia', {
+        configurable: true,
+        writable: true,
+        value: () => ({
+          matches: false,
+          media: '',
+          onchange: null,
+          addListener: () => {},
+          removeListener: () => {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => false
+        })
+      });
+    }
+
+    spyOn(window, 'matchMedia').and.callFake((query: string) => ({
+      matches: isMobileViewport,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false
+    } as MediaQueryList));
+
     await TestBed.configureTestingModule({
       imports: [SlideshowPlayer],
       providers: [
@@ -164,6 +195,13 @@ describe('SlideshowPlayer', () => {
     expect(fullscreenButton.textContent?.trim()).toBe('⤡');
   });
 
+  it('should hide the fullscreen toggle on mobile', () => {
+    isMobileViewport = true;
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.fullscreen-toggle-button')).toBeNull();
+  });
+
   it('should enter fullscreen when not already fullscreen', async () => {
     await component.toggleFullscreen();
 
@@ -217,6 +255,31 @@ describe('SlideshowPlayer', () => {
 
     expect(component.isFullscreenAvailable()).toBeFalse();
   });
+
+  it('should report fullscreen as unavailable on mobile', () => {
+    isMobileViewport = true;
+
+    expect(component.isFullscreenAvailable()).toBeFalse();
+  });
+
+  it('should not toggle fullscreen on mobile', async () => {
+    isMobileViewport = true;
+
+    await component.toggleFullscreen();
+
+    expect(requestFullscreenSpy).not.toHaveBeenCalled();
+    expect(exitFullscreenSpy).not.toHaveBeenCalled();
+  });
+
+  it('should keep controls visible on mobile even when cursor is hidden', fakeAsync(() => {
+    isMobileViewport = true;
+    slideshowServiceMock.isRunning.and.returnValue(true);
+    component.onImageMouseMove();
+    tick(2000);
+
+    component.isFullscreen = true;
+    expect(component.shouldHideControls()).toBeFalse();
+  }));
 
   it('should exit fullscreen when slideshow is stopped', async () => {
     fullscreenElement = fullScreenDocument.documentElement;

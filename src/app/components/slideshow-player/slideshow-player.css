@@ -31,6 +31,21 @@
   cursor: none;
 }
 
+.controls {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 1rem;
+  padding: 2rem;
+  opacity: 0.25;
+  transition: opacity 0.2s ease;
+}
+
+.controls:hover {
+  opacity: 1;
+}
+
 .control-button {
   width: 42px;
   height: 42px;
@@ -48,6 +63,32 @@
 .controls.controls-hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  .controls {
+    left: 50%;
+    right: auto;
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom));
+    border-radius: 9999px;
+    background: rgba(17, 24, 39, 0.45);
+    backdrop-filter: blur(8px);
+    opacity: 0.82;
+  }
+
+  .controls:hover {
+    opacity: 0.9;
+  }
+
+  .control-button {
+    width: 46px;
+    height: 46px;
+    border-radius: 9999px;
+    background: rgba(243, 244, 246, 0.94);
+  }
 }
 
 @keyframes spin {
