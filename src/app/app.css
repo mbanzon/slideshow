@@ -19,6 +19,15 @@
     max-height: 10rem !important;
 }
 
+.landing-main > p {
+    color: var(--muted);
+}
+
+.landing-main > p a {
+    color: inherit;
+    text-decoration-color: color-mix(in srgb, currentColor 50%, transparent);
+}
+
 @media (max-width: 640px) {
     .landing-main {
         gap: 1rem;
