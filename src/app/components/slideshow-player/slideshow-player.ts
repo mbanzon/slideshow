@@ -23,17 +23,9 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   isInfoDialogOpen = false;
 
   private readonly fullscreenChangeHandler = () => {
-    const wasFullscreen = this.isFullscreen;
     this.isFullscreen = this.document.fullscreenElement != null;
     if (this.isMobileDevice()) {
       return;
-    }
-    if (
-      wasFullscreen
-      && !this.isFullscreen
-      && (this.slideshowService.isRunning() || this.slideshowService.isPaused())
-    ) {
-      this.slideshowService.stop();
     }
     this.exitFullscreenIfStopped();
   };

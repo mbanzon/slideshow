@@ -277,7 +277,7 @@ describe('SlideshowPlayer', () => {
     expect(component.isFullscreen).toBeFalse();
   });
 
-  it('should stop slideshow when exiting fullscreen while active', () => {
+  it('should keep slideshow state unchanged when exiting fullscreen while active', () => {
     slideshowServiceMock.isRunning.and.returnValue(true);
 
     fullscreenElement = fullScreenDocument.documentElement;
@@ -286,7 +286,7 @@ describe('SlideshowPlayer', () => {
 
     fullscreenElement = null;
     fullScreenDocument.dispatchEvent(new Event('fullscreenchange'));
-    expect(slideshowServiceMock.stop).toHaveBeenCalledTimes(1);
+    expect(slideshowServiceMock.stop).not.toHaveBeenCalled();
   });
 
   it('should report fullscreen as unavailable when browser support is disabled', () => {
