@@ -18,6 +18,8 @@ describe('SlideshowPlayer', () => {
     currentImgSrc: WritableSignal<string | null>;
     isLoading: WritableSignal<boolean>;
     countdownProgress: WritableSignal<number>;
+    currentFileName: jasmine.Spy;
+    currentFileDisplayName: jasmine.Spy;
     isRunning: jasmine.Spy;
     isStopped: jasmine.Spy;
     isPaused: jasmine.Spy;
@@ -32,6 +34,8 @@ describe('SlideshowPlayer', () => {
     currentImgSrc: signal<string | null>('data:image/png;base64,abc'),
     isLoading: signal(false),
     countdownProgress: signal(0),
+    currentFileName: jasmine.createSpy('currentFileName').and.returnValue('photo.jpg'),
+    currentFileDisplayName: jasmine.createSpy('currentFileDisplayName').and.returnValue('album/photo.jpg'),
     isRunning: jasmine.createSpy('isRunning').and.returnValue(false),
     isStopped: jasmine.createSpy('isStopped').and.returnValue(false),
     isPaused: jasmine.createSpy('isPaused').and.returnValue(false),
@@ -193,6 +197,41 @@ describe('SlideshowPlayer', () => {
     fixture.detectChanges();
 
     expect(fullscreenButton.textContent?.trim()).toBe('⤡');
+  });
+
+  it('should show the info button while the slideshow is active', () => {
+    expect(fixture.nativeElement.querySelector('.info-button')).toBeNull();
+
+    slideshowServiceMock.isRunning.and.returnValue(true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.info-button')).not.toBeNull();
+  });
+
+  it('should show the info button while the slideshow is paused', () => {
+    slideshowServiceMock.isPaused.and.returnValue(true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.info-button')).not.toBeNull();
+  });
+
+  it('should pause the slideshow and open the image details dialog from the info button', () => {
+    slideshowServiceMock.isRunning.and.returnValue(true);
+    fixture.detectChanges();
+
+    const infoButton = fixture.nativeElement.querySelector('.info-button') as HTMLButtonElement;
+    infoButton.click();
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector('.info-dialog') as HTMLElement;
+    const filename = fixture.nativeElement.querySelector('.info-dialog-filename') as HTMLElement;
+    const downloadLink = fixture.nativeElement.querySelector('.info-dialog-download') as HTMLAnchorElement;
+
+    expect(slideshowServiceMock.pause).toHaveBeenCalledTimes(1);
+    expect(dialog).not.toBeNull();
+    expect(filename.textContent?.trim()).toBe('album/photo.jpg');
+    expect(downloadLink.getAttribute('download')).toBe('photo.jpg');
+    expect(downloadLink.getAttribute('href')).toBe('data:image/png;base64,abc');
   });
 
   it('should hide the fullscreen toggle on mobile', () => {

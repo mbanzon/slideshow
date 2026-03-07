@@ -23,6 +23,50 @@
             (mouseleave)="onImageMouseLeave()"
             (click)="slideshowService.isRunning() && slideshowService.pause()"
             />
+
+        @if (!slideshowService.isStopped() || isInfoDialogOpen) {
+            <button
+                type="button"
+                class="info-button"
+                [class.controls-hidden]="shouldHideControls() && !isInfoDialogOpen"
+                (click)="openInfoDialog()"
+                aria-label="Show current image details"
+                title="Show current image details"
+            >
+                i
+            </button>
+        }
+
+        @if (isInfoDialogOpen) {
+            <div class="info-dialog-backdrop" (click)="closeInfoDialog()">
+                <div
+                    class="info-dialog"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Current image details"
+                    (click)="$event.stopPropagation()"
+                >
+                    <button
+                        type="button"
+                        class="info-dialog-close"
+                        (click)="closeInfoDialog()"
+                        aria-label="Close image details"
+                        title="Close"
+                    >
+                        &times;
+                    </button>
+                    <p class="info-dialog-label">Current file</p>
+                    <p class="info-dialog-filename">{{ slideshowService.currentFileDisplayName() }}</p>
+                    <a
+                        class="info-dialog-download"
+                        [href]="slideshowService.currentImgSrc()"
+                        [attr.download]="slideshowService.currentFileName()"
+                    >
+                        Download image
+                    </a>
+                </div>
+            </div>
+        }
         
         <div class="controls" [class.controls-hidden]="shouldHideControls()">
             @if (!isMobileDevice()) {

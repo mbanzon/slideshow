@@ -20,6 +20,7 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
   private cursorHidden = false;
   private wasRunning = this.slideshowService.isRunning();
   isFullscreen = false;
+  isInfoDialogOpen = false;
 
   private readonly fullscreenChangeHandler = () => {
     const wasFullscreen = this.isFullscreen;
@@ -74,7 +75,20 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
     if (this.isMobileDevice()) {
       return false;
     }
-    return this.isFullscreen && this.shouldHideCursor();
+    return this.isFullscreen && this.shouldHideCursor() && !this.isInfoDialogOpen;
+  }
+
+  openInfoDialog() {
+    if (this.slideshowService.isRunning()) {
+      this.slideshowService.pause();
+    }
+    this.isInfoDialogOpen = true;
+    this.showCursor();
+    this.clearHideCursorTimeout();
+  }
+
+  closeInfoDialog() {
+    this.isInfoDialogOpen = false;
   }
 
   async toggleFullscreen() {
@@ -112,6 +126,9 @@ export class SlideshowPlayer implements DoCheck, OnDestroy {
     if (this.wasRunning && !isRunning) {
       this.showCursor();
       this.clearHideCursorTimeout();
+    }
+    if (this.slideshowService.currentImgSrc() == null) {
+      this.isInfoDialogOpen = false;
     }
     this.exitFullscreenIfStopped();
     this.wasRunning = isRunning;

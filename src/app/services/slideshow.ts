@@ -180,6 +180,21 @@ export class SlideshowService {
   isRunning = () => this.stateMachine.getState() === STATE_RUNNING;
   hasImages = () => this.imageFiles.length > 0;
   imageCount = () => this.imageFiles.length;
+  currentFile = (): File | null => {
+    const currentImageIndex = this.getImageIndexAtPosition(this.indexIndex);
+    if (currentImageIndex == null) {
+      return null;
+    }
+    return this.imageFiles[currentImageIndex] ?? null;
+  };
+  currentFileName = () => this.currentFile()?.name ?? null;
+  currentFileDisplayName = () => {
+    const file = this.currentFile();
+    if (file == null) {
+      return null;
+    }
+    return file.webkitRelativePath || file.name;
+  };
 
   private updateCurrentImage() {
     this.stopTicker();
